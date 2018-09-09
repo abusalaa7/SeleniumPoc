@@ -23,7 +23,7 @@ namespace FlinksLogin
 
         public AutomatedLoginService(string url)
         {
-            // HACK: make driver's path
+            // HACK: make driver's path relative
             _driver = new ChromeDriver(@"/Users/Aymeric/00-Sources/flinks/FlinksLogin/bin/Debug/netcoreapp2.1");
             _driver.Url = url;
 
@@ -34,40 +34,10 @@ namespace FlinksLogin
         {
             NavigateToLogin();
 
-            var userWord = ForceLogin();
-//            var userWord = "2222";    // For fast debugging
+//            var userWord = ForceLogin();
+            var userWord = "2222";    // For fast debugging
 
-            while (_occurence <= TargetOccurences)
-            {
-                // back and new url don't work
-                if (_occurence % 2 == 1)
-                {
-                    var back = _driver.FindElement(By.LinkText("BACK"));
-                    back.Click();
-                }
-                else
-                {
-                    _driver.Url = _loginPageUrl;
-                }
-                
-                // New tabs don't work
-                if (_occurence % 9 == 8)
-                {
-                    ((IJavaScriptExecutor)_driver).ExecuteScript("window.open();");
-                    _driver.SwitchTo().Window(_driver.WindowHandles.Last());
-                    _driver.Navigate().GoToUrl(_loginPageUrl);
-                }
-                
-                var areCredentialsStillAccepted = TryVerifyCredentials(userWord, userWord);
-
-                if (!areCredentialsStillAccepted)
-                {
-                    Console.ReadLine();
-                    throw new Exception("Something Went Wrong...");
-                }
-                
-                RetrieveToken();
-            }
+            RetrieveAllTokens(userWord);
         }
 
         private void NavigateToLogin()
@@ -173,10 +143,28 @@ namespace FlinksLogin
             passwordField.Submit();
         }
 
+        private void RetrieveAllTokens(string userWord)
+        {
+            while (_occurence <= TargetOccurences)
+            {
+//                NavigateRoRandomWebsite();    // useless...
+
+                _driver.Url = _loginPageUrl;
+
+                var areCredentialsStillAccepted = TryVerifyCredentials(userWord, userWord);
+
+                if (!areCredentialsStillAccepted)
+                {
+                    Console.ReadLine();
+                    throw new Exception("Something Went Wrong...");
+                }
+
+                RetrieveToken();
+            }
+        }
+
         private void RetrieveToken()
         {
-            MoveMouseRandomly();
-            
             var token = _driver.FindElements(By.CssSelector("b"))
                 .Select(x => x.Text)
                 .Single(x => x.Length > 50); // HACK: shallow logic but works
@@ -184,6 +172,21 @@ namespace FlinksLogin
             _occurence++; // HACK: would need to retrieve it from the page.
 
             Console.WriteLine($"Challenge Id {_challengeId} - Token {token} - Occurence {_occurence}");
+        }
+
+        private void NavigateRoRandomWebsite()
+        {
+            var websites = new List<string>();
+            websites.Add("https://www.google.ca");
+            websites.Add("https://www.medium.com");
+            websites.Add("https://www.lemonde.fr");
+            websites.Add("https://www.nytimes.com");
+            
+            var rand = new Random();
+            var websiteToVisit = websites[rand.Next(1, websites.Count - 1)];
+
+            _driver.Url = websiteToVisit;
+            Thread.Sleep(TimeSpan.FromMilliseconds(rand.Next(2000, 20000)));
         }
 
         private void MoveMouseRandomly()
@@ -194,12 +197,13 @@ namespace FlinksLogin
             var occurenceMove = 0;
             while (occurenceMove < 2 * MinimumOccurenceMouseMove)
             {
-                var x = rand.Next(-100, 100);
-                var y = rand.Next(-100, 100);
+                var x = rand.Next(-10, 10);
+                var y = rand.Next(-10, 10);
 
                 action.MoveByOffset(x, y);
                 occurenceMove++;
             }
+            action.Build().Perform();
         }
 
         private IList<string> GeneratePasswords()
