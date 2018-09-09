@@ -18,7 +18,7 @@ What didn't work
 * navigating to a few pages and waiting a random time
 * waiting a random time (longer)
 * clearing cookies
-* try to get them token from an expired session (back to main page, cookie most likely invalid, see cleared cookies)
+* hit an expired session (as if I returned one hour or more later)
 
 
 ## Results
