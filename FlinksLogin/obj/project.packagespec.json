@@ -1,0 +1,55 @@
+﻿{
+  "version": "1.0.0",
+  "restore": {
+    "projectUniqueName": "/Users/Aymeric/00-Sources/flinks/FlinksLogin/FlinksLogin.csproj",
+    "projectName": "FlinksLogin",
+    "projectPath": "/Users/Aymeric/00-Sources/flinks/FlinksLogin/FlinksLogin.csproj",
+    "outputPath": "/Users/Aymeric/00-Sources/flinks/FlinksLogin/obj/",
+    "projectStyle": "PackageReference",
+    "fallbackFolders": [
+      "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
+    ],
+    "originalTargetFrameworks": [
+      "netcoreapp2.1"
+    ],
+    "frameworks": {
+      "netcoreapp2.1": {
+        "projectReferences": {}
+      }
+    },
+    "warningProperties": {
+      "warnAsError": [
+        "NU1605"
+      ]
+    }
+  },
+  "frameworks": {
+    "netcoreapp2.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "suppressParent": "All",
+          "target": "Package",
+          "version": "[2.1.0, )",
+          "autoReferenced": true
+        },
+        "Selenium.Chrome.WebDriver": {
+          "target": "Package",
+          "version": "[2.41.0, )"
+        },
+        "Selenium.WebDriver": {
+          "target": "Package",
+          "version": "[3.14.0, )"
+        },
+        "Selenium.WebDriver.ChromeDriver": {
+          "target": "Package",
+          "version": "[2.41.0, )"
+        }
+      },
+      "imports": [
+        "net461"
+      ],
+      "assetTargetFallback": true,
+      "warn": true
+    }
+  }
+}

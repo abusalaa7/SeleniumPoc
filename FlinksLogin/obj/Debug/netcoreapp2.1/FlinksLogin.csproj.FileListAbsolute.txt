@@ -1,0 +1,11 @@
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/bin/Debug/netcoreapp2.1/FlinksLogin.deps.json
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/bin/Debug/netcoreapp2.1/FlinksLogin.runtimeconfig.json
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/bin/Debug/netcoreapp2.1/FlinksLogin.runtimeconfig.dev.json
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/bin/Debug/netcoreapp2.1/FlinksLogin.dll
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/bin/Debug/netcoreapp2.1/FlinksLogin.pdb
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/obj/Debug/netcoreapp2.1/FlinksLogin.csprojAssemblyReference.cache
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/obj/Debug/netcoreapp2.1/FlinksLogin.csproj.CoreCompileInputs.cache
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/obj/Debug/netcoreapp2.1/FlinksLogin.AssemblyInfoInputs.cache
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/obj/Debug/netcoreapp2.1/FlinksLogin.AssemblyInfo.cs
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/obj/Debug/netcoreapp2.1/FlinksLogin.dll
+/Users/Aymeric/00-Sources/flinks/FlinksLogin/obj/Debug/netcoreapp2.1/FlinksLogin.pdb
