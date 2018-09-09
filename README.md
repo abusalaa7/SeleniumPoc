@@ -13,8 +13,12 @@ https://www.distilnetworks.com/glossary/term/web-application-firewall/
 What didn't work  
 * trying to get more than 10 occurences manually (typing and clicking as a human)
 * opening a new tab
+* opening a new window
+* opening a different browser
 * navigating to a few pages and waiting a random time
-* try to get them token from an expired session (back to main page, challenge id most likely invalid)
+* waiting a random time (longer)
+* clearing cookies
+* try to get them token from an expired session (back to main page, cookie most likely invalid, see cleared cookies)
 
 
 ## Results
