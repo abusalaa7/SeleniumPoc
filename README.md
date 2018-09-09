@@ -3,7 +3,7 @@
 ## TODO
 
 Manage to get past the 10 occurences  
-* Best would be to setup a server with basic bot detection to test again. It would be much less laborious  
+* Best would be to setup a server with basic bot detection to test against. It would be much less laborious  
 * Need to read some more on what makes a session, how to make it truly unique  
 https://support.google.com/analytics/answer/2731565?hl=en  
 
