@@ -8,6 +8,13 @@ Manage to get past the 10 occurences
 https://support.google.com/analytics/answer/2731565?hl=en (analytics point of view)  
 
 
+What didn't work  
+* trying to get more than 10 occurences manually (typing and clicking as a human)
+* opening a new tab
+* navigating to a few pages and waiting a random time
+* try to get them token from an expired session (back to main page, challenge id most likely invalid)
+
+
 ## Results
 
 ```
